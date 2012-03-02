@@ -12,7 +12,8 @@ module Homebrew extend self
 end
 
 class RefreshBrew
-  REPOSITORY_URL = "https://github.com/mxcl/homebrew.git"
+  REPOSITORY_URL = "git@github.com:taojonesin/homebrew.git"
+  UPSTREAM_URL = "https://github.com/mxcl/homebrew.git"
   FORMULA_DIR = 'Library/Formula/'
   EXAMPLE_DIR = 'Library/Contributions/examples/'
 
@@ -42,7 +43,9 @@ class RefreshBrew
         begin
           safe_system "git init"
           safe_system "git remote add origin #{REPOSITORY_URL}"
+          safe_system "git remote add upstream #{UPSTREAM_URL}"
           safe_system "git fetch origin"
+          safe_system "git fetch upstream"
           safe_system "git reset --hard origin/master"
         rescue Exception
           safe_system "/bin/rm -rf .git"
@@ -52,8 +55,10 @@ class RefreshBrew
 
       # specify a refspec so that 'origin/master' gets updated
       refspec = "refs/heads/master:refs/remotes/origin/master"
+      refspec2 = "refs/heads/master:refs/remotes/upstream/master"
       rebase = "--rebase" if ARGV.include? "--rebase"
       execute "git pull #{rebase} origin #{refspec}"
+      execute "git pull #{rebase} upstream #{refspec2}"
       @current_revision = read_revision
     end
 
